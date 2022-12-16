@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="WeekProgressBar">
+        <attr name="progress" format="float" />
+        <attr name="wpb_backgroundcolor" format="color" />
+        <attr name="wpb_progresscolor" format="color" />
+        <attr name="wpb_progresstextcolor" format="color" />
+    </declare-styleable>
+</resources>
