@@ -124,9 +124,10 @@ public class WeekProgressBar extends View {
 
         float offsetY = (progressTextPaint.descent() + progressTextPaint.ascent()) / 2;
         canvas.drawText(progress + "%", progressRect.right, bodyRect.top + offsetY, progressTextPaint);
-        offsetY = (hoursLeftTextPaint.descent() + hoursLeftTextPaint.ascent()) / 2;
         canvas.drawText("99.9 hrs", progressRect.exactCenterX(), progressRect.top + 28 , hoursLeftTextPaint);
         canvas.drawText("(RO x4)", progressRect.exactCenterX(), progressRect.bottom - 12, hoursLeftTextPaint);
+        canvas.drawText("99.9 hrs", bodyRect.exactCenterX() + progressRect.right / 2, bodyRect.top + 28, hoursCompletedTextPaint);
+        canvas.drawText("left", bodyRect.exactCenterX() + progressRect.right / 2, bodyRect.bottom - 12, hoursCompletedTextPaint);
     }
 
     public void setProgress(float progress) {
