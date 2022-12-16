@@ -152,4 +152,22 @@ public class WeekProgressBar extends View {
         invalidate();
         requestLayout();
     }
+
+    public void setAmountRO(int amountRO) {
+        this.amountRO = amountRO;
+        invalidate();
+        requestLayout();
+    }
+
+    public void setHoursCompleted(float hoursCompleted) {
+        this.hoursCompleted = hoursCompleted;
+        invalidate();
+        requestLayout();
+    }
+
+    public void setHoursUncompleted(float hoursUncompleted) {
+        this.hoursUncompleted = hoursUncompleted;
+        invalidate();
+        requestLayout();
+    }
 }
