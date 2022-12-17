@@ -16,8 +16,8 @@ import com.example.dfrprogressbar.R;
 public class WeekProgressBar extends View {
 
     private static final int DEFAULT_SIZE = 40;
-    private static final int DEFAULT_BACKGROUND_COLOR = Color.GRAY;
-    private static final int DEFAULT_PROGRESS_COLOR = Color.GREEN;
+    private static final int DEFAULT_BACKGROUND_COLOR = Color.parseColor("#D9D9D9");
+    private static final int DEFAULT_PROGRESS_COLOR = Color.parseColor("#3F8C27");
     private static final int DEFAULT_PROGRESS_TEXT_COLOR = Color.WHITE;
     private static final float DEFAULT_PROGRESS = 50.0F;
 
@@ -108,8 +108,7 @@ public class WeekProgressBar extends View {
 
     protected void drawProgress(Canvas canvas) {
         if (progress > 100) {
-            //TODO: CHANGE COLOR HERE
-            progressPaint.setColor(Color.BLACK);
+            progressPaint.setColor(Color.parseColor("#00521d"));
             canvas.drawRoundRect(new RectF(progressRect), 5F, 5F, progressPaint);
         } else {
             progressPaint.setColor(progressColor);
