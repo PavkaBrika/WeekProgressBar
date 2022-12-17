@@ -21,24 +21,27 @@ public class TimelineProgressBar extends View {
     private static final int DEFAULT_PROGRESS_COLOR = Color.parseColor("#7B7B7C");
     private static final int DEFAULT_PROGRESS = 50;
 
-    private int backgroundColor = Color.GRAY;
+    private int backgroundColor = Color.BLACK;
     private int progressColor =  Color.GREEN;
-    private int progress = 0.0;
+    private int progress = 0;
+    private int separatorColor = Color.BLACK;
 
     private final Rect bodyRect = new Rect();
+    private final Rect separatorRect = new Rect();
     private final Rect progressRect = new Rect();
 
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint separatorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
     public TimelineProgressBar(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
 
         if (attrs != null) {
-            TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.WeekProgressBar);
-            progress = ta.getFloat(R.styleable.WeekProgressBar_progress, DEFAULT_PROGRESS);
-            progressColor = ta.getColor(R.styleable.WeekProgressBar_wpb_progresscolor, DEFAULT_PROGRESS_COLOR);
-            backgroundColor = ta.getColor(R.styleable.WeekProgressBar_wpb_backgroundcolor, DEFAULT_BACKGROUND_COLOR);
+            TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.TimelineProgressBar);
+            progress = ta.getInt(R.styleable.TimelineProgressBar_tpb_progress, DEFAULT_PROGRESS);
+            progressColor = ta.getColor(R.styleable.TimelineProgressBar_tpb_progresscolor, DEFAULT_PROGRESS_COLOR);
+            backgroundColor = ta.getColor(R.styleable.TimelineProgressBar_tpb_backgroundcolor, DEFAULT_BACKGROUND_COLOR);
             ta.recycle();
         }
     }
@@ -55,24 +58,30 @@ public class TimelineProgressBar extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-
         if (w == 0)
             return;
         //body
         bodyRect.left = 0;
-        bodyRect.top = 50;
+        bodyRect.top = 0;
         bodyRect.right = w;
         bodyRect.bottom = h;
         //completed
-        progressRect.left = 0;
-        progressRect.top = 50;
-        progressRect.right = (int) ((w / 100.0) * progress);
-        progressRect.bottom = h;
+//        progressRect.left = 0;
+//        progressRect.top = 50;
+//        progressRect.right = (int) ((w / 100.0) * progress);
+//        progressRect.bottom = h;
+
+        separatorRect.left = 0;
+        separatorRect.top = 0;
+        separatorRect.right = 0;
+        separatorRect.bottom = h;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        drawBody(canvas);
+        invalidate();
     }
 
     protected int resolveDefaultSize(int spec) {
@@ -84,6 +93,14 @@ public class TimelineProgressBar extends View {
 
     protected void drawBody(Canvas canvas) {
         backgroundPaint.setColor(backgroundColor);
-        canvas.drawRoundRect(new RectF(bodyRect), 5F, 5F, backgroundPaint);
+        separatorPaint.setColor(separatorColor);
+        canvas.drawRoundRect(new RectF(bodyRect), 15F, 15F, backgroundPaint);
+        for (int i = 0; i <= 4; i++ ) {
+            separatorRect.left += bodyRect.width() / 5 + 10;
+            separatorRect.right += bodyRect.width() / 5;
+            canvas.drawRect(separatorRect, separatorPaint);
+        }
+//        canvas.drawRect(separatorRect, separatorPaint);
+
     }
 }
