@@ -27,7 +27,7 @@ public class WeekProgressBar extends View {
     private float progress = 0.0F;
     private int amountRO = 0;
     private float hoursCompleted = 0.0F;
-    private float hoursUncompleted = 0.0F;
+    private float hoursLeft = 0.0F;
 
     //Rect
     private final Rect bodyRect = new Rect();
@@ -76,7 +76,7 @@ public class WeekProgressBar extends View {
         //completed
         progressRect.left = 0;
         progressRect.top = 50;
-        progressRect.right = (int) ((w / 100.0) * progress);
+        progressRect.right = (int) ((w / 100.0) * (progress % 100));
         progressRect.bottom = h;
     }
 
@@ -97,14 +97,24 @@ public class WeekProgressBar extends View {
     }
 
     protected void drawBody(Canvas canvas) {
-        backgroundPaint.setColor(backgroundColor);
-
-        canvas.drawRoundRect(new RectF(bodyRect), 5F, 5F, backgroundPaint);
+        if (progress > 100) {
+            backgroundPaint.setColor(progressColor);
+            canvas.drawRoundRect(new RectF(bodyRect), 5F, 5F, backgroundPaint);
+        } else {
+            backgroundPaint.setColor(backgroundColor);
+            canvas.drawRoundRect(new RectF(bodyRect), 5F, 5F, backgroundPaint);
+        }
     }
 
     protected void drawProgress(Canvas canvas) {
-        progressPaint.setColor(progressColor);
-        canvas.drawRoundRect(new RectF(progressRect), 5F, 5F, progressPaint);
+        if (progress > 100) {
+            //TODO: CHANGE COLOR HERE
+            progressPaint.setColor(Color.BLACK);
+            canvas.drawRoundRect(new RectF(progressRect), 5F, 5F, progressPaint);
+        } else {
+            progressPaint.setColor(progressColor);
+            canvas.drawRoundRect(new RectF(progressRect), 5F, 5F, progressPaint);
+        }
     }
 
     protected void drawText(Canvas canvas) {
@@ -119,6 +129,7 @@ public class WeekProgressBar extends View {
         hoursLeftTextPaint.setTextSize(getHeight() * 0.2F);
         hoursLeftTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
         //HoursCompletedText
+        hoursCompletedTextPaint.setColor(Color.WHITE);
         hoursCompletedTextPaint.setTextAlign(Paint.Align.CENTER);
         hoursCompletedTextPaint.setTextSize(getHeight() * 0.2F);
         hoursCompletedTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
@@ -128,29 +139,44 @@ public class WeekProgressBar extends View {
 
         String hoursCompletedString = hoursCompleted + " hrs";
         String amountROString = "(RO x" + amountRO + ")";
-        if ((hoursLeftTextPaint.measureText(hoursCompletedString) >= progressRect.width()) || (hoursLeftTextPaint.measureText(amountROString) >= progressRect.width())) {
-            canvas.drawText(hoursCompletedString, progressRect.right + 50, progressRect.top + 28 , hoursLeftTextPaint);
-            canvas.drawText(amountROString, progressRect.right + 50, progressRect.bottom - 12, hoursLeftTextPaint);
+        if ((hoursCompletedTextPaint.measureText(hoursCompletedString) >= progressRect.width()) || (hoursCompletedTextPaint.measureText(amountROString) >= progressRect.width())) {
+            canvas.drawText(hoursCompletedString, progressRect.right + 50, progressRect.top + 28 , hoursCompletedTextPaint);
+            canvas.drawText(amountROString, progressRect.right + 50, progressRect.bottom - 12, hoursCompletedTextPaint);
         } else {
-            canvas.drawText(hoursCompletedString, progressRect.exactCenterX(), progressRect.top + 28 , hoursLeftTextPaint);
-            canvas.drawText(amountROString, progressRect.exactCenterX(), progressRect.bottom - 12, hoursLeftTextPaint);
+            canvas.drawText(hoursCompletedString, progressRect.exactCenterX(), progressRect.top + 28 , hoursCompletedTextPaint);
+            canvas.drawText(amountROString, progressRect.exactCenterX(), progressRect.bottom - 12, hoursCompletedTextPaint);
         }
-        String hoursUncompletedString = hoursUncompleted + " hrs";
-        if ((hoursLeftTextPaint.measureText(hoursUncompletedString) >= bodyRect.width() - progressRect.width()) || (hoursLeftTextPaint.measureText("left") >= bodyRect.width() - progressRect.width())) {
-            hoursCompletedTextPaint.setColor(backgroundColor);
-            canvas.drawText(hoursUncompletedString, progressRect.right - 50, bodyRect.top + 28, hoursCompletedTextPaint);
-            canvas.drawText("left", progressRect.right - 50, bodyRect.bottom - 12, hoursCompletedTextPaint);
+        if (progress < 100) {
+            String hoursLeftString = hoursLeft + " hrs";
+            if ((hoursLeftTextPaint.measureText(hoursLeftString) >= bodyRect.width() - progressRect.width()) || (hoursLeftTextPaint.measureText("left") >= bodyRect.width() - progressRect.width())) {
+                hoursLeftTextPaint.setColor(backgroundColor);
+                canvas.drawText(hoursLeftString, progressRect.right - 50, bodyRect.top + 28, hoursLeftTextPaint);
+                canvas.drawText("left", progressRect.right - 50, bodyRect.bottom - 12, hoursLeftTextPaint);
+            } else {
+                hoursLeftTextPaint.setColor(progressColor);
+                canvas.drawText(hoursLeftString, bodyRect.exactCenterX() + progressRect.right / 2, bodyRect.top + 28, hoursLeftTextPaint);
+                canvas.drawText("left", bodyRect.exactCenterX() + progressRect.right / 2, bodyRect.bottom - 12, hoursLeftTextPaint);
+            }
         } else {
-            hoursCompletedTextPaint.setColor(progressColor);
-            canvas.drawText(hoursUncompletedString, bodyRect.exactCenterX() + progressRect.right / 2, bodyRect.top + 28, hoursCompletedTextPaint);
-            canvas.drawText("left", bodyRect.exactCenterX() + progressRect.right / 2, bodyRect.bottom - 12, hoursCompletedTextPaint);
+            String hoursLeftString = "ACHIEVED";
+            hoursLeftTextPaint.setColor(backgroundColor);
+            if (hoursLeftTextPaint.measureText(hoursLeftString) >= bodyRect.width() - progressRect.width()) {
+                canvas.drawText(hoursLeftString, progressRect.right - 65, bodyRect.exactCenterY() - offsetY, hoursLeftTextPaint);
+            } else {
+                canvas.drawText(hoursLeftString, bodyRect.right - 65, bodyRect.exactCenterY() - offsetY, hoursLeftTextPaint);
+            }
         }
+
     }
 
     public void setProgress(float progress) {
         this.progress = progress;
         invalidate();
         requestLayout();
+    }
+
+    public float getProgress() {
+        return progress;
     }
 
     public void setAmountRO(int amountRO) {
@@ -165,8 +191,8 @@ public class WeekProgressBar extends View {
         requestLayout();
     }
 
-    public void setHoursUncompleted(float hoursUncompleted) {
-        this.hoursUncompleted = hoursUncompleted;
+    public void setHoursLeft(float hoursLeft) {
+        this.hoursLeft = hoursLeft;
         invalidate();
         requestLayout();
     }
