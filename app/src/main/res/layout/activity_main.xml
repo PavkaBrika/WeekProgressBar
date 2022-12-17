@@ -19,7 +19,8 @@
         android:id="@+id/timeline"
         android:layout_width="244dp"
         android:layout_height="16dp"
-        android:layout_marginTop="100dp" />
+        android:layout_marginTop="100dp"
+        app:tpb_progress="40"/>
 
 
 </LinearLayout>

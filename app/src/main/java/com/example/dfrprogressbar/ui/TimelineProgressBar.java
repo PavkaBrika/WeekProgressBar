@@ -27,7 +27,10 @@ public class TimelineProgressBar extends View {
     private int separatorColor = Color.BLACK;
 
     private final Rect bodyRect = new Rect();
-    private final Rect separatorRect = new Rect();
+    private final Rect firstSeparatorRect = new Rect();
+    private final Rect secondSeparatorRect = new Rect();
+    private final Rect thirdSeparatorRect = new Rect();
+    private final Rect forthSeparatorRect = new Rect();
     private final Rect progressRect = new Rect();
 
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -65,22 +68,40 @@ public class TimelineProgressBar extends View {
         bodyRect.top = 0;
         bodyRect.right = w;
         bodyRect.bottom = h;
-        //completed
-//        progressRect.left = 0;
-//        progressRect.top = 50;
-//        progressRect.right = (int) ((w / 100.0) * progress);
-//        progressRect.bottom = h;
 
-        separatorRect.left = 0;
-        separatorRect.top = 0;
-        separatorRect.right = 0;
-        separatorRect.bottom = h;
+        //completed
+        progressRect.left = 0;
+        progressRect.top = 0;
+        progressRect.right = (int) ((w / 100.0) * progress);
+        progressRect.bottom = h;
+
+        firstSeparatorRect.left = w / 5 - 4;
+        firstSeparatorRect.top = 0;
+        firstSeparatorRect.right = w / 5 + 4;
+        firstSeparatorRect.bottom = h;
+
+        secondSeparatorRect.left = w / 5 * 2 - 4;
+        secondSeparatorRect.top = 0;
+        secondSeparatorRect.right = w / 5 * 2 + 4;
+        secondSeparatorRect.bottom = h;
+
+        thirdSeparatorRect.left = w / 5 * 3 - 4;
+        thirdSeparatorRect.top = 0;
+        thirdSeparatorRect.right = w / 5 * 3 + 4;
+        thirdSeparatorRect.bottom = h;
+
+        forthSeparatorRect.left = w / 5 * 4 - 4;
+        forthSeparatorRect.top = 0;
+        forthSeparatorRect.right = w / 5 * 4 + 4;
+        forthSeparatorRect.bottom = h;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         drawBody(canvas);
+        drawProgress(canvas);
+        drawSeparators(canvas);
         invalidate();
     }
 
@@ -93,14 +114,30 @@ public class TimelineProgressBar extends View {
 
     protected void drawBody(Canvas canvas) {
         backgroundPaint.setColor(backgroundColor);
-        separatorPaint.setColor(separatorColor);
         canvas.drawRoundRect(new RectF(bodyRect), 15F, 15F, backgroundPaint);
-        for (int i = 0; i <= 4; i++ ) {
-            separatorRect.left += bodyRect.width() / 5 + 10;
-            separatorRect.right += bodyRect.width() / 5;
-            canvas.drawRect(separatorRect, separatorPaint);
-        }
-//        canvas.drawRect(separatorRect, separatorPaint);
-
     }
+
+    protected void drawProgress(Canvas canvas) {
+        progressPaint.setColor(progressColor);
+        canvas.drawRoundRect(new RectF(progressRect), 10F, 10F, progressPaint);
+    }
+
+    protected void drawSeparators(Canvas canvas) {
+        separatorPaint.setColor(separatorColor);
+        canvas.drawRect(firstSeparatorRect, separatorPaint);
+        canvas.drawRect(secondSeparatorRect, separatorPaint);
+        canvas.drawRect(thirdSeparatorRect, separatorPaint);
+        canvas.drawRect(forthSeparatorRect, separatorPaint);
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+        invalidate();
+        requestLayout();
+    }
+
+    public int getProgress() {
+        return progress;
+    }
+
 }
