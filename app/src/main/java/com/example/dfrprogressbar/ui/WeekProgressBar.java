@@ -2,9 +2,12 @@ package com.example.dfrprogressbar.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -30,8 +33,9 @@ public class WeekProgressBar extends View {
     private float hoursLeft = 0.0F;
 
     //Rect
-    private final Rect bodyRect = new Rect();
-    private final Rect progressRect = new Rect();
+    private final Rect bodyRectDst = new Rect();
+    private final Rect progressRectSrc = new Rect();
+//    private final Rect progressRect = new Rect();
     //Rect Paint
     private final Paint backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint progressPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -39,6 +43,10 @@ public class WeekProgressBar extends View {
     private final Paint progressTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint hoursLeftTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint hoursCompletedTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    private Bitmap bitmapSrc;
+    private Bitmap bitmapDsc;
+
 
 
     public WeekProgressBar(Context context, AttributeSet attrs) {
@@ -68,28 +76,67 @@ public class WeekProgressBar extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         if (w == 0)
             return;
+        progressPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
         //body
-        bodyRect.left = 0;
-        bodyRect.top = 50;
-        bodyRect.right = w;
-        bodyRect.bottom = h;
+        bodyRectDst.left = 0;
+        bodyRectDst.top = 50;
+        bodyRectDst.right = w;
+        bodyRectDst.bottom = h;
         //completed
-        progressRect.left = 0;
-        progressRect.top = 50;
+        progressRectSrc.left = 0;
+        progressRectSrc.top = 50;
         if (progress > 100)
-            progressRect.right = (int) ((w / 100.0) * (progress % 100));
+            progressRectSrc.right = (int) ((w / 100.0) * (progress % 100));
         else
-            progressRect.right = (int) ((w / 100.0) * progress);
-        progressRect.bottom = h;
+            progressRectSrc.right = (int) ((w / 100.0) * progress);
+        progressRectSrc.bottom = h;
+
+//        prepareBitmaps(w, h);
+        bitmapDsc = createBitmap(bodyRectDst, backgroundPaint, w, h);
+
+        bitmapSrc = createBitmap(progressRectSrc, progressPaint, w / 2, h);
+
+
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawBody(canvas);
-        drawProgress(canvas);
+//        drawBody(canvas);
+//        canvas.drawBitmap(maskBm, bodyRect, bodyRect, null);
+//        drawProgress(canvas);
+
+        canvas.drawBitmap(bitmapDsc, 0, 0, backgroundPaint);
+        canvas.drawBitmap(bitmapSrc, 0, 0, progressPaint);
         drawText(canvas);
         invalidate();
+    }
+
+//    private void prepareBitmaps(int w, int h) {
+//        maskBm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+//        resultBm = maskBm.copy(Bitmap.Config.ARGB_8888, true);
+//        Canvas maskCanvas = new Canvas(maskBm);
+//        maskCanvas.drawRoundRect(new RectF(bodyRectDst), 15f, 15f, backgroundPaint);
+//        backgroundPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
+//        srcBm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+//
+//        Canvas resultCanvas = new Canvas(resultBm);
+//
+//        resultCanvas.drawBitmap(maskBm, bodyRectDst, bodyRectDst, null);
+//        resultCanvas.drawBitmap(srcBm, bodyRectDst, bodyRectDst, null);
+//
+//
+////        progressPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_ATOP));
+//
+//    }
+
+    private Bitmap createBitmap(Rect rect, Paint paint, int w, int h) {
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas bitmapCanvas = new Canvas(bitmap);
+
+        bitmapCanvas.drawRect(rect, paint);
+
+        return bitmap;
     }
 
     protected int resolveDefaultSize(int spec) {
@@ -102,20 +149,22 @@ public class WeekProgressBar extends View {
     protected void drawBody(Canvas canvas) {
         if (progress > 100) {
             backgroundPaint.setColor(progressColor);
-            canvas.drawRoundRect(new RectF(bodyRect), 15F, 15F, backgroundPaint);
+            canvas.drawRoundRect(new RectF(bodyRectDst), 15F, 15F, backgroundPaint);
         } else {
             backgroundPaint.setColor(backgroundColor);
-            canvas.drawRoundRect(new RectF(bodyRect), 15F, 15F, backgroundPaint);
+            canvas.drawRoundRect(new RectF(bodyRectDst), 15F, 15F, backgroundPaint);
         }
     }
 
     protected void drawProgress(Canvas canvas) {
         if (progress > 100) {
             progressPaint.setColor(Color.parseColor("#00521d"));
-            canvas.drawRoundRect(new RectF(progressRect), 15F, 15F, progressPaint);
+//            canvas.drawRoundRect(new RectF(progressRoundRect), 15F, 15F, progressPaint);
         } else {
             progressPaint.setColor(progressColor);
-            canvas.drawRoundRect(new RectF(progressRect), 15F, 15F, progressPaint);
+            canvas.drawRect(progressRectSrc, progressPaint);
+
+//            canvas.drawRoundRect(new RectF(progressRoundRect), 15F, 15F, progressPaint);
         }
     }
 
@@ -137,35 +186,35 @@ public class WeekProgressBar extends View {
         hoursCompletedTextPaint.setTypeface(Typeface.DEFAULT_BOLD);
 
         float offsetY = (progressTextPaint.descent() + progressTextPaint.ascent()) / 2;
-        canvas.drawText(progress + "%", progressRect.right, bodyRect.top + offsetY, progressTextPaint);
+        canvas.drawText(progress + "%", progressRectSrc.right, bodyRectDst.top + offsetY, progressTextPaint);
 
         String hoursCompletedString = hoursCompleted + " hrs";
         String amountROString = "(RO x" + amountRO + ")";
-        if ((hoursCompletedTextPaint.measureText(hoursCompletedString) >= progressRect.width()) || (hoursCompletedTextPaint.measureText(amountROString) >= progressRect.width())) {
-            canvas.drawText(hoursCompletedString, progressRect.right + 50, (float) (progressRect.top + progressRect.height() / 2 + offsetY / 2.5) , hoursCompletedTextPaint);
-            canvas.drawText(amountROString, progressRect.right + 50, (float) (progressRect.bottom - progressRect.height() / 2 - offsetY * 2.5), hoursCompletedTextPaint);
+        if ((hoursCompletedTextPaint.measureText(hoursCompletedString) >= progressRectSrc.width()) || (hoursCompletedTextPaint.measureText(amountROString) >= progressRectSrc.width())) {
+            canvas.drawText(hoursCompletedString, progressRectSrc.right + 50, (float) (progressRectSrc.top + progressRectSrc.height() / 2 + offsetY / 2.5) , hoursCompletedTextPaint);
+            canvas.drawText(amountROString, progressRectSrc.right + 50, (float) (progressRectSrc.bottom - progressRectSrc.height() / 2 - offsetY * 2.5), hoursCompletedTextPaint);
         } else {
-            canvas.drawText(hoursCompletedString, progressRect.exactCenterX(), (float) (progressRect.top + progressRect.height() / 2 + offsetY / 2.5), hoursCompletedTextPaint);
-            canvas.drawText(amountROString, progressRect.exactCenterX(), (float) (progressRect.bottom - progressRect.height() / 2 - offsetY * 2.5), hoursCompletedTextPaint);
+            canvas.drawText(hoursCompletedString, progressRectSrc.exactCenterX(), (float) (progressRectSrc.top + progressRectSrc.height() / 2 + offsetY / 2.5), hoursCompletedTextPaint);
+            canvas.drawText(amountROString, progressRectSrc.exactCenterX(), (float) (progressRectSrc.bottom - progressRectSrc.height() / 2 - offsetY * 2.5), hoursCompletedTextPaint);
         }
         if (progress < 100) {
             String hoursLeftString = hoursLeft + " hrs";
-            if ((hoursLeftTextPaint.measureText(hoursLeftString) >= bodyRect.width() - progressRect.width()) || (hoursLeftTextPaint.measureText("left") >= bodyRect.width() - progressRect.width())) {
+            if ((hoursLeftTextPaint.measureText(hoursLeftString) >= bodyRectDst.width() - progressRectSrc.width()) || (hoursLeftTextPaint.measureText("left") >= bodyRectDst.width() - progressRectSrc.width())) {
                 hoursLeftTextPaint.setColor(backgroundColor);
-                canvas.drawText(hoursLeftString, progressRect.right - 50, (float) (bodyRect.top + bodyRect.height() / 2 + offsetY / 2.5), hoursLeftTextPaint);
-                canvas.drawText("left", progressRect.right - 50, (float) (bodyRect.bottom - bodyRect.height() / 2 - offsetY * 2.5), hoursLeftTextPaint);
+                canvas.drawText(hoursLeftString, progressRectSrc.right - 50, (float) (bodyRectDst.top + bodyRectDst.height() / 2 + offsetY / 2.5), hoursLeftTextPaint);
+                canvas.drawText("left", progressRectSrc.right - 50, (float) (bodyRectDst.bottom - bodyRectDst.height() / 2 - offsetY * 2.5), hoursLeftTextPaint);
             } else {
                 hoursLeftTextPaint.setColor(progressColor);
-                canvas.drawText(hoursLeftString, bodyRect.exactCenterX() + progressRect.right / 2, (float) (bodyRect.top + bodyRect.height() / 2 + offsetY / 2.5), hoursLeftTextPaint);
-                canvas.drawText("left", bodyRect.exactCenterX() + progressRect.right / 2, (float) (bodyRect.bottom - bodyRect.height() / 2 - offsetY * 2.5), hoursLeftTextPaint);
+                canvas.drawText(hoursLeftString, bodyRectDst.exactCenterX() + progressRectSrc.right / 2, (float) (bodyRectDst.top + bodyRectDst.height() / 2 + offsetY / 2.5), hoursLeftTextPaint);
+                canvas.drawText("left", bodyRectDst.exactCenterX() + progressRectSrc.right / 2, (float) (bodyRectDst.bottom - bodyRectDst.height() / 2 - offsetY * 2.5), hoursLeftTextPaint);
             }
         } else {
             String hoursLeftString = "ACHIEVED";
             hoursLeftTextPaint.setColor(backgroundColor);
-            if (hoursLeftTextPaint.measureText(hoursLeftString) >= bodyRect.width() - progressRect.width()) {
-                canvas.drawText(hoursLeftString, progressRect.right - progressRect.right / 10, bodyRect.exactCenterY() - offsetY, hoursLeftTextPaint);
+            if (hoursLeftTextPaint.measureText(hoursLeftString) >= bodyRectDst.width() - progressRectSrc.width()) {
+                canvas.drawText(hoursLeftString, progressRectSrc.right - progressRectSrc.right / 10, bodyRectDst.exactCenterY() - offsetY, hoursLeftTextPaint);
             } else {
-                canvas.drawText(hoursLeftString, bodyRect.right - progressRect.right / 10, bodyRect.exactCenterY() - offsetY, hoursLeftTextPaint);
+                canvas.drawText(hoursLeftString, bodyRectDst.right - progressRectSrc.right / 10, bodyRectDst.exactCenterY() - offsetY, hoursLeftTextPaint);
             }
         }
 

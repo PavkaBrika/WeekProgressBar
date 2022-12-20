@@ -16,7 +16,8 @@ import com.example.dfrprogressbar.R;
 
 public class TimelineProgressBar extends View {
 
-    private static final int DEFAULT_SIZE = 40;
+    private static final int DEFAULT_WIDTH = 150;
+    private static final int DEFAULT_HEIGHT = 44;
     private static final int DEFAULT_BACKGROUND_COLOR = Color.parseColor("#D9D9D9");
     private static final int DEFAULT_PROGRESS_COLOR = Color.parseColor("#7B7B7C");
     private static final int DEFAULT_PROGRESS = 50;
@@ -53,10 +54,37 @@ public class TimelineProgressBar extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int initWidthSize = resolveDefaultSize(widthMeasureSpec);
-        int initHeightSize = resolveDefaultSize(heightMeasureSpec);
-        setMeasuredDimension(initWidthSize, initHeightSize);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width;
+        int height;
+
+        if (widthMode == MeasureSpec.EXACTLY) {
+            width = widthSize;
+        } else if (widthMode == MeasureSpec.AT_MOST) {
+            width = Math.min(DEFAULT_WIDTH, widthSize);
+        } else {
+            width = DEFAULT_WIDTH;
+        }
+
+        //Measure Height
+        if (heightMode == MeasureSpec.EXACTLY) {
+            //Must be this size
+            height = heightSize;
+        } else if (heightMode == MeasureSpec.AT_MOST) {
+            //Can't be bigger than...
+            height = Math.min(DEFAULT_HEIGHT, heightSize);
+        } else {
+            //Be whatever you want
+            height = DEFAULT_HEIGHT;
+        }
+
+        setMeasuredDimension(width, height);
     }
+
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -105,12 +133,7 @@ public class TimelineProgressBar extends View {
         invalidate();
     }
 
-    protected int resolveDefaultSize(int spec) {
-        if (MeasureSpec.getMode(spec) == MeasureSpec.UNSPECIFIED)
-            return (int) (getContext().getResources().getDisplayMetrics().density * DEFAULT_SIZE);
-        else
-            return MeasureSpec.getSize(spec);
-    }
+
 
     protected void drawBody(Canvas canvas) {
         backgroundPaint.setColor(backgroundColor);
@@ -139,5 +162,4 @@ public class TimelineProgressBar extends View {
     public int getProgress() {
         return progress;
     }
-
 }
